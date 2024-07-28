@@ -7,7 +7,7 @@ function App() {
   const [testCases, setTestCases] = useState([]);
 
   useEffect(() => {
-    const socket = socketIOClient(process.env.REACT_BASE_URL);
+    const socket = socketIOClient(process.env.REACT_APP_API_KEY);
     socket.on('FromAPI', (data) => {
       setTestCases(data);
     });
