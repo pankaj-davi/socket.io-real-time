@@ -38,9 +38,8 @@ const TestCase = mongoose.model('TestCase', testCaseSchema);
 
 // Create dummy test cases
 const createDummyData = async () => {
-//   await TestCase.deleteMany({});
+  // await TestCase.deleteMany({});
   await TestCase.insertMany([
-   
   ]);
 //   console.log('Dummy data created');
 };
@@ -64,5 +63,8 @@ io.on('connection', (socket) => {
   });
 });
 
-const PORT = 5000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.get('/', (req, res) => {
+  res.send('Hello World');
+});
+
+server.listen(process.env.PORT, () => console.log(`Server running on port ${process.env.PORT}`));
