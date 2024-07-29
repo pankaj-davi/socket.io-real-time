@@ -6,7 +6,6 @@ function App() {
   const [testCases, setTestCases] = useState([]);
 
   useEffect(() => {
-    // Get the API endpoint from the environment variable
     let endpoint = process.env.REACT_APP_API_KEY;
 
 
@@ -14,7 +13,7 @@ function App() {
 
     socket.on('FromAPI', (data) => {
       setTestCases(data);
-      console.log("FromAPI", data);
+      console.log("FromAPI lo", data);
     });
 
     return () => socket.disconnect();
