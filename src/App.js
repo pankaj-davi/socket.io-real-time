@@ -9,10 +9,6 @@ function App() {
     // Get the API endpoint from the environment variable
     let endpoint = process.env.REACT_APP_API_KEY;
 
-    // Ensure the endpoint uses HTTPS if the page is served over HTTPS
-    if (window.location.protocol === 'https:' && endpoint.startsWith('http:')) {
-      endpoint = endpoint.replace('http:', 'https:');
-    }
 
     const socket = socketIOClient(endpoint);
 
