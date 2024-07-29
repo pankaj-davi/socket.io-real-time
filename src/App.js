@@ -2,15 +2,23 @@ import React, { useEffect, useState } from 'react';
 import socketIOClient from 'socket.io-client';
 import './App.css';
 
-
 function App() {
   const [testCases, setTestCases] = useState([]);
 
   useEffect(() => {
-    const socket = socketIOClient(process.env.REACT_APP_API_KEY);
+    // Get the API endpoint from the environment variable
+    let endpoint = process.env.REACT_APP_API_KEY;
+
+    // Ensure the endpoint uses HTTPS if the page is served over HTTPS
+    if (window.location.protocol === 'https:' && endpoint.startsWith('http:')) {
+      endpoint = endpoint.replace('http:', 'https:');
+    }
+
+    const socket = socketIOClient(endpoint);
+
     socket.on('FromAPI', (data) => {
       setTestCases(data);
-      console.log("Fromaap" , data)
+      console.log("FromAPI", data);
     });
 
     return () => socket.disconnect();
