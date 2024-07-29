@@ -24,6 +24,9 @@ app.use(express.static(path.join(__dirname, 'client', 'build')));
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
 });
+app.get('/pankaj', (req, res) => {
+  res.send('HelloLastChanges');
+});
 
 mongoose.connect(process.env.MONGOURI, {
   serverSelectionTimeoutMS: 30000,
