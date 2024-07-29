@@ -10,6 +10,7 @@ function App() {
     const socket = socketIOClient(process.env.REACT_APP_API_KEY);
     socket.on('FromAPI', (data) => {
       setTestCases(data);
+      console.log("Fromaap" , data)
     });
 
     return () => socket.disconnect();
