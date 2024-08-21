@@ -1,88 +1,116 @@
-import React, { useEffect, useState } from 'react';
-import { Avatar, Table, Tag } from 'antd';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Avatar, Table, Tag, Row, Col, Typography } from 'antd';
 import socketIOClient from 'socket.io-client';
-import {UserOutlined} from '@ant-design/icons';
-import 'antd/dist/reset.css'
-import Logo from "./2023_synchrony_basic_logo.svg"
+import { UserOutlined } from '@ant-design/icons';
+import 'antd/dist/reset.css';
+import Logo from "./2023_synchrony_basic_logo.svg";
 import './App.css';
+
+const { Title, Text } = Typography;
 
 function App() {
   const [testCases, setTestCases] = useState([]);
+  const [dateTime, setDateTime] = useState({
+    date: new Date().toLocaleDateString(),
+    time: new Date().toLocaleTimeString(),
+  });
+  const [project] = useState('My Project');
+  const [scenarioSummary, setScenarioSummary] = useState({
+    passed: 0,
+    failed: 0,
+    skipped: 0,
+    total: 0,
+  });
   const [columns, setColumns] = useState([]);
 
   useEffect(() => {
     const endpoint = process.env.REACT_APP_API_KEY;
     const socket = socketIOClient(endpoint);
 
-    socket.on('FromAPI', (data) => {
-      console.log("Received data from API:", data);
-
+    const handleData = (data) => {
       setTestCases(data.testCases);
+      setScenarioSummary(calculateSummary(data.testCases));
+      if (data.schema) setColumns(generateColumnsFromSchema(data.schema));
+    };
 
-
-      if (data.schema) {
-        console.log("Schema received:", data.schema);
-        const generatedColumns = generateColumnsFromSchema(data.schema);
-        console.log("Generated Columns:", generatedColumns);
-        setColumns(generatedColumns);
-      } else {
-        console.warn("No schema provided in the data.");
-      }
-    });
+    socket.on('FromAPI', handleData);
 
     return () => socket.disconnect();
   }, []);
 
-  const generateColumnsFromSchema = (schema) => {
-    if (!schema || typeof schema !== 'object') {
-      console.error("Invalid schema:", schema);
-      return [];
-    }
+  const calculateSummary = (testCases) =>
+    testCases.reduce((acc, { status }) => {
+      acc[status] = (acc[status] || 0) + 1;
+      acc.total += 1;
+      return acc;
+    }, { passed: 0, failed: 0, skipped: 0, total: 0 });
 
-    return Object.keys(schema).map((key) => {
-      const column = {
+  const statusColors = {
+    passed: 'green',
+    failed: 'red',
+    skipped: 'blue',
+    total: 'orange',
+  };
+
+  const generateColumnsFromSchema = (schema) =>
+    Object.keys(schema).map((key) => {
+      const isDateColumn = key === 'createdAt' || key === 'updatedAt';
+      return {
         title: key.charAt(0).toUpperCase() + key.slice(1),
         dataIndex: key,
-        key: key,
+        key,
         render: (text) => {
           if (key === 'status') {
-            const statusColors = {
-              pending: 'orange',
-              running: 'blue',
-              passed: 'green',
-              failed: 'red'
-            };
-            const normalizedText = (text || '').toLowerCase();
-             return <Tag color={statusColors[normalizedText] || 'default'}>{text}</Tag>;
+            return <Tag color={statusColors[text?.toLowerCase()] || 'default'}>{text}</Tag>;
           }
-          return Array.isArray(text) ? text.join(', ') : text; 
+          return isDateColumn ? new Date(text).toLocaleString() : Array.isArray(text) ? text.join(', ') : text;
         },
+        sorter: isDateColumn ? (a, b) => new Date(a[key]) - new Date(b[key]) : undefined,
+        sortDirections: ['ascend', 'descend'],
       };
-
-      return column;
     });
-  };
+
+  const columnsMemo = useMemo(() => generateColumnsFromSchema(testCases[0] || {}), [testCases]);
 
   return (
     <div className="App">
-     <header className="App-header">
+      <header className="App-header">
         <img src={Logo} alt="logo" />
-        <Avatar size="default" icon={<UserOutlined  />} className="user-icon" />
+        <Avatar size="default" icon={<UserOutlined />} className="user-icon" />
       </header>
       <main>
+        <div className="summary-section">
+          <Row justify="space-between" className="summary-section-row">
+            <Col>
+              <Title level={4}>Project: {project}</Title>
+              <Text>Date: {dateTime.date}</Text> <br />
+              <Text>Time: {dateTime.time}</Text>
+            </Col>
+            <Col className="summary-section-row-status">
+              {['Total', 'Passed', 'Failed', 'Skipped'].map((key) => (
+                <Tag
+                  bordered={false}
+                  size="large"
+                  key={key}
+                  className={`summary-section-row-status-items`}
+                  color={statusColors[key?.toLowerCase()] || 'default'}
+                >
+                  {`${key} :  `} {scenarioSummary[key.toLowerCase()]}
+                </Tag>
+              ))}
+            </Col>
+          </Row>
+        </div>
         <Table
-          bordered={true}
+          bordered
           virtual
-          className="ant-table-wrapper" 
-          columns={columns}
+          className="ant-table-wrapper"
+          columns={columnsMemo}
           dataSource={testCases}
-          rowKey="_id" 
+          rowKey="_id"
           pagination={false}
-          size="large" 
-          scroll={{
-            x: 1000,
-            y: 300,
-          }}
+          size="large"
+          scroll={{ x: 300, y: 300 }}
         />
       </main>
     </div>
