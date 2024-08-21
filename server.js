@@ -4,7 +4,8 @@ const mongoose = require('mongoose');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
-const path = require('path'); // Import path module
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
@@ -17,13 +18,49 @@ const io = socketIo(server, {
 
 app.use(cors());
 
-// Serve static files from the React app
-app.use(express.static(path.join(__dirname, 'client', 'build')));
+// Load and parse the schemas JSON file
+const schemasPath = path.join(__dirname, 'schemas.json');
 
-// Serve the main HTML file for the root path
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
+let models = {};
+let schemaDefinitions = {};
+
+const createMongooseSchema = (jsonSchema) => {
+  const mongooseSchema = {};
+  for (const [key, value] of Object.entries(jsonSchema)) {
+    if (typeof value === 'string') {
+      mongooseSchema[key] = { type: mongoose.Schema.Types[value] };
+    } else if (Array.isArray(value)) {
+      mongooseSchema[key] = [{ type: mongoose.Schema.Types[value[0]] }];
+    } else {
+      mongooseSchema[key] = value;
+    }
+  }
+  return new mongoose.Schema(mongooseSchema);
+};
+
+const loadSchemas = () => {
+  const schemasJSON = JSON.parse(fs.readFileSync(schemasPath, 'utf8'));
+  models = {};
+  schemaDefinitions = schemasJSON;
+
+  for (const [modelName, schemaDefinition] of Object.entries(schemasJSON)) {
+    const mongooseSchema = createMongooseSchema(schemaDefinition);
+    models[modelName] = mongoose.model(modelName, mongooseSchema);
+  }
+  console.log('Schemas loaded');
+};
+
+// Initial schema loading
+loadSchemas();
+
+// Watch for changes in the schemas.json file
+fs.watch(schemasPath, (eventType, filename) => {
+  if (eventType === 'change') {
+    console.log(`${filename} updated, reloading schemas...`);
+    loadSchemas();
+  }
 });
+
 app.get('/pankaj', (req, res) => {
   res.send('HelloLastChanges');
 });
@@ -38,40 +75,27 @@ mongoose.connect(process.env.MONGOURI, {
   console.error('Error connecting to MongoDB:', err);
 });
 
-// Define TestCase schema and model
-const testCaseSchema = new mongoose.Schema({
-  name: String,
-  status: { type: String, enum: ['pending', 'running', 'passed', 'failed'], default: 'pending' },
-  logs: [String],
-});
-
-const TestCase = mongoose.model('TestCase', testCaseSchema);
-
-// Create dummy test cases
-const createDummyData = async () => {
-  // await TestCase.deleteMany({});
-  await TestCase.insertMany([
-    // Add your dummy data here if needed
-  ]);
-  // console.log('Dummy data created');
-};
-
-createDummyData();
-
 io.on('connection', (socket) => {
   console.log('New client connected');
 
-  // Function to send test cases to clients
+  // Function to send test cases and schema
   const sendTestCases = async () => {
-    const testCases = await TestCase.find();
-    socket.emit('FromAPI', testCases);
+    try {
+      const testCases = await models.TestCase.find(); // Adjust model name as needed
+      socket.emit('FromAPI', {
+        testCases,
+        schema: schemaDefinitions.TestCase // Adjust model name as needed
+      });
+    } catch (error) {
+      console.error('Error sending test cases:', error);
+    }
   };
 
   // Send initial data to new clients
   sendTestCases();
 
-  // Set up a change stream to listen for updates
-  const changeStream = TestCase.watch();
+  // Set up a change stream to listen for updates on the TestCase model
+  const changeStream = models.TestCase.watch();
 
   changeStream.on('change', (change) => {
     console.log('Change detected:', change);
@@ -84,4 +108,4 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(process.env.PORT, () => console.log(`Server running on port ${process.env.PORT}`));
+server.listen(8080, () => console.log(`Server running on port ${8080}`));
