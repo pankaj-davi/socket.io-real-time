@@ -45,7 +45,8 @@ const loadSchemas = () => {
 
   for (const [modelName, schemaDefinition] of Object.entries(schemasJSON)) {
     const mongooseSchema = createMongooseSchema(schemaDefinition);
-    models[modelName] = mongoose.model(modelName, mongooseSchema);
+    // Check if the model already exists before creating it
+    models[modelName] = mongoose.models[modelName] || mongoose.model(modelName, mongooseSchema);
   }
   console.log('Schemas loaded');
 };
