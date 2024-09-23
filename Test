@@ -1,1 +1,238 @@
+import { jsPDF } from "jspdf";
+import { Document, Packer, Paragraph, TextRun } from "docs";
+import { saveAs } from "file-saver"; // For saving Word document
+import { useState } from "react";
 
+// Function to handle content and format it for both Word and PDF
+const processAndExport = async (content) => {
+    // Generate the Word document
+    await generateWordDocument(content);
+    
+    // Generate PDF using jsPDF
+    generatePDF(content);
+};
+
+// Function to create a Word document using docs library
+const generateWordDocument = async (content) => {
+    const doc = new Document();
+    let insideCodeBlock = false;
+
+    // Add a title to the document
+    doc.addSection({
+        children: [
+            new Paragraph({
+                children: [
+                    new TextRun({
+                        text: "Formatted ChatGPT Response",
+                        bold: true,
+                        size: 32,
+                    }),
+                ],
+            }),
+        ],
+    });
+
+    const lines = content.split('\n');
+
+    lines.forEach(line => {
+        line = line.trim();
+
+        // Handle code blocks
+        if (line.startsWith('```')) {
+            insideCodeBlock = !insideCodeBlock;
+            return;
+        }
+
+        if (insideCodeBlock) {
+            doc.addSection({
+                children: [
+                    new Paragraph({
+                        children: [
+                            new TextRun({
+                                text: line,
+                                font: "Courier New", // Monospace for code
+                                size: 24,
+                            }),
+                        ],
+                    }),
+                ],
+            });
+        } else {
+            // Handle headings
+            if (line.startsWith('## ')) {
+                doc.addSection({
+                    children: [
+                        new Paragraph({
+                            children: [
+                                new TextRun({
+                                    text: line.replace('## ', ''),
+                                    bold: true,
+                                    size: 28,
+                                }),
+                            ],
+                        }),
+                    ],
+                });
+            }
+            // Handle bold text
+            else if (line.includes('**')) {
+                const textParts = line.split('**');
+                const paragraphChildren = textParts.map((part, index) => {
+                    return index % 2 === 1
+                        ? new TextRun({ text: part, bold: true })
+                        : new TextRun({ text: part });
+                });
+                doc.addSection({
+                    children: [new Paragraph({ children: paragraphChildren })],
+                });
+            }
+            // Handle italic text
+            else if (line.includes('*')) {
+                const textParts = line.split('*');
+                const paragraphChildren = textParts.map((part, index) => {
+                    return index % 2 === 1
+                        ? new TextRun({ text: part, italics: true })
+                        : new TextRun({ text: part });
+                });
+                doc.addSection({
+                    children: [new Paragraph({ children: paragraphChildren })],
+                });
+            }
+            // Handle lists
+            else if (line.startsWith('- ')) {
+                doc.addSection({
+                    children: [
+                        new Paragraph({
+                            bullet: {
+                                level: 0,
+                            },
+                            children: [new TextRun(line.replace('- ', ''))],
+                        }),
+                    ],
+                });
+            }
+            // Handle numbered lists
+            else if (/^\d+\.\s/.test(line)) {
+                doc.addSection({
+                    children: [
+                        new Paragraph({
+                            numbering: {
+                                reference: 'numbered-list',
+                                level: 0,
+                            },
+                            children: [new TextRun(line.replace(/^\d+\.\s/, ''))],
+                        }),
+                    ],
+                });
+            }
+            // Handle normal text
+            else {
+                doc.addSection({
+                    children: [
+                        new Paragraph({
+                            children: [new TextRun(line)],
+                        }),
+                    ],
+                });
+            }
+        }
+    });
+
+    const buffer = await Packer.toBuffer(doc);
+    saveAs(new Blob([buffer]), 'output.docx');
+};
+
+// Function to generate PDF using jsPDF
+const generatePDF = (content) => {
+    const doc = new jsPDF();
+    const lines = content.split('\n');
+    let insideCodeBlock = false;
+
+    let yPosition = 10; // Starting y position
+
+    lines.forEach(line => {
+        line = line.trim();
+
+        // Handle code blocks
+        if (line.startsWith('```')) {
+            insideCodeBlock = !insideCodeBlock;
+            return;
+        }
+
+        if (insideCodeBlock) {
+            // Monospace font for code blocks
+            doc.setFont("Courier", "normal");
+            doc.setFontSize(10);
+            doc.text(line, 10, yPosition);
+            yPosition += 7;
+        } else {
+            // Handle headings
+            if (line.startsWith('## ')) {
+                doc.setFont("Helvetica", "bold");
+                doc.setFontSize(16);
+                doc.text(line.replace('## ', ''), 10, yPosition);
+                yPosition += 10;
+            }
+            // Handle bold text
+            else if (line.includes('**')) {
+                doc.setFont("Helvetica", "bold");
+                const boldText = line.replace(/\*\*(.*?)\*\*/g, "$1");
+                doc.text(boldText, 10, yPosition);
+                yPosition += 10;
+            }
+            // Handle italic text
+            else if (line.includes('*')) {
+                doc.setFont("Helvetica", "italic");
+                const italicText = line.replace(/\*(.*?)\*/g, "$1");
+                doc.text(italicText, 10, yPosition);
+                yPosition += 10;
+            }
+            // Handle lists
+            else if (line.startsWith('- ')) {
+                doc.setFont("Helvetica", "normal");
+                doc.text('• ' + line.replace('- ', ''), 10, yPosition);
+                yPosition += 7;
+            }
+            // Handle numbered lists
+            else if (/^\d+\.\s/.test(line)) {
+                doc.setFont("Helvetica", "normal");
+                doc.text(line, 10, yPosition);
+                yPosition += 7;
+            }
+            // Handle normal text
+            else {
+                doc.setFont("Helvetica", "normal");
+                doc.text(line, 10, yPosition);
+                yPosition += 7;
+            }
+        }
+    });
+
+    // Save the PDF
+    doc.save('output.pdf');
+};
+
+// React component
+const DocumentGenerator = () => {
+    const [responseText, setResponseText] = useState('');
+
+    const handleGenerate = () => {
+        processAndExport(responseText);
+    };
+
+    return (
+        <div>
+            <textarea
+                value={responseText}
+                onChange={(e) => setResponseText(e.target.value)}
+                rows="10"
+                cols="50"
+                placeholder="Paste the response here..."
+            ></textarea>
+            <br />
+            <button onClick={handleGenerate}>Generate Documents</button>
+        </div>
+    );
+};
+
+export default DocumentGenerator;
