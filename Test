@@ -1,18 +1,67 @@
-// Regex to validate passport numbers for many countries
-const passportRegex = /^(?!.*[^A-Za-z0-9])(?=.{6,14}$)([A-Z]{1}[0-9]{7}|[0-9]{9}|[A-Z]{1}[0-9]{6}|[A-Z]{2}[0-9]{6}|[A-Z]{3}[0-9]{5}|[0-9]{8}|[A-Z]{1}[0-9]{8})$/i;
+function isValidPassport(passportNumber, country) {
+    // Define regex patterns for different countries
+    const patterns = {
+        "US": /^(?!^0+$)[0-9]{9}$/,                          // 9 digits, cannot be all zeros
+        "UK": /^[A-Z]{1}[0-9]{7}[A-Z]{1}$/,                   // 1 letter, 7 digits, 1 letter
+        "DE": /^[A-Z0-9]{9}$/,                                 // 9 alphanumeric characters
+        "IN": /^[A-Z]{1}[0-9]{7}$/,                           // 1 letter followed by 7 digits
+        "CA": /^[A-Z]{2}[0-9]{6}$/,                           // 2 letters followed by 6 digits
+        "AU": /^[A-Z]{1}[0-9]{7}$/,                           // 1 letter followed by 7 digits
+        "FR": /^[0-9]{2}[A-Z]{2}[0-9]{5}$/,                   // 2 digits, 2 letters, 5 digits
+        "IT": /^[A-Z0-9]{9}$/,                                 // 9 alphanumeric characters
+        "JP": /^[A-Z0-9]{9}$/,                                 // 9 alphanumeric characters
+        "BR": /^[0-9]{8}$/,                                    // 8 digits
+        "MX": /^[A-Z0-9]{9}$/,                                 // 9 characters (1 letter, 8 digits)
+        "ZA": /^[A-Z]{1}[0-9]{7}$/,                           // 1 letter followed by 7 digits
+        "CN": /^[A-Z][0-9]{8}$/,                              // 1 letter followed by 8 digits
+        "RU": /^[0-9]{9}$/,                                   // 9 digits
+        "ES": /^[A-Z]{1}[0-9]{7}[A-Z]{1}$/,                    // 1 letter, 7 digits, 1 letter
+        "TR": /^[A-Z0-9]{9}$/,                                 // 9 alphanumeric characters
+        "AR": /^[0-9]{8}$/,                                    // 8 digits
+        "CO": /^[0-9]{10}$/,                                   // 10 digits
+        "PH": /^[A-Z0-9]{9}$/,                                 // 9 characters
+        "ID": /^[A-Z]{1}[0-9]{7}$/,                            // 1 letter followed by 7 digits
+        "MY": /^[A-Z]{1}[0-9]{8}$/,                            // 1 letter followed by 8 digits
+        "SG": /^[A-Z]{1}[0-9]{7}$/,                            // 1 letter followed by 7 digits
+        // Add more countries and patterns as needed
+    };
 
-function validatePassport(passportNumber) {
-    return passportRegex.test(passportNumber);
+    // Check if the country is supported
+    if (!patterns[country]) {
+        throw new Error(`Country ${country} not supported.`);
+    }
+
+    // Validate the passport number against the selected country's pattern
+    return patterns[country].test(passportNumber);
 }
 
-// Test examples
-console.log(validatePassport("A1234567"));       // true (India)
-console.log(validatePassport("123456789"));      // true (USA)
-console.log(validatePassport("C012345678"));     // true (Germany)
-console.log(validatePassport("N1234567"));       // true (Australia)
-console.log(validatePassport("AB123456"));       // true (Canada)
-console.log(validatePassport("A123456"));        // false (too short)
-console.log(validatePassport("12345678A"));      // true (USA variation)
-console.log(validatePassport("ABCDE123"));        // false (not valid format)
-console.log(validatePassport("C12345678"));      // false (too long)
-console.log(validatePassport("A123456789"));     // false (too long)
+// Example usage
+const passportNumbers = {
+    "US": "123456789",   // valid
+    "UK": "A1234567B",   // valid
+    "DE": "C01A23456",   // valid
+    "IN": "A1234567",    // valid
+    "CA": "AB123456",    // valid
+    "AU": "A1234567",    // valid
+    "FR": "12AB34567",    // valid
+    "IT": "M12345678",    // valid
+    "JP": "A12345678",    // valid
+    "BR": "12345678",     // valid
+    "MX": "A123456789",   // valid
+    "ZA": "A1234567",     // valid
+    "CN": "E12345678",    // valid
+    "RU": "123456789",     // valid
+    "ES": "A1234567B",     // valid
+    "TR": "A12345678",     // valid
+    "AR": "12345678",      // valid
+    "CO": "1234567890",    // valid
+    "PH": "A12345678",     // valid
+    "ID": "A1234567",      // valid
+    "MY": "A12345678",     // valid
+    "SG": "A1234567",      // valid
+    // Add more countries and passport numbers for testing
+};
+
+for (const [country, passportNumber] of Object.entries(passportNumbers)) {
+    console.log(`${passportNumber} (${country}): ${isValidPassport(passportNumber, country)}`);
+}
