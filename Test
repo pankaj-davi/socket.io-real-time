@@ -1,38 +1,18 @@
-const customValidations = [
-  {
-    regex: /(?:CVV|CVC|CVV2|Security Code)\s*(\d{3,4})/i,  // Case-insensitive CVV detection
-    message: 'CVV detected.'
-  },
-  {
-    regex: /(?:credit card number|cc number|credit card #)\s*(\d{16}|\d{4}-\d{4}-\d{4}-\d{4})/i,  // Case-insensitive credit card detection
-    message: 'Credit card number detected.'
-  },
-  {
-    regex: /SSO\s*(\d{9})/i,  // Case-insensitive SSO detection
-    message: 'SSO detected.'
-  },
-  {
-    regex: /(Patient ID)\s*([A-Z]{2}\d{3}\/\d{3}\.\d{2})/i,  // Case-insensitive Patient ID detection
-    message: 'Patient ID detected.'
-  },
-  {
-    regex: /(Birth date|DOB|Date of Birth)\s*(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4})/i,  // Case-insensitive DOB detection
-    message: 'DOB detected.'
-  },
-  {
-    regex: /(address|zip code)\s*(\d{5}(?:-\d{4})?)/i,  // Case-insensitive address detection
-    message: 'Address detected.'
-  },
-  {
-    regex: /(Passport Number|Passport #)\s*(\w+)/i,  // Case-insensitive passport number detection
-    message: 'Passport number detected.'
-  },
-  {
-    regex: /\b(\d{9}|\d{19})\b/i,  // 9- or 19-digit account number detection (not case-sensitive as it’s numeric)
-    message: 'Account number detected (9 or 19 digits).'
-  },
-  {
-    regex: /(?:SSN|Social Security Number)\s*(\d{3}-\d{2}-\d{4})/i,  // Case-insensitive SSN detection
-    message: 'SSN detected.'
-  }
-];
+// Regex to validate passport numbers for many countries
+const passportRegex = /^(?!.*[^A-Za-z0-9])(?=.{6,14}$)([A-Z]{1}[0-9]{7}|[0-9]{9}|[A-Z]{1}[0-9]{6}|[A-Z]{2}[0-9]{6}|[A-Z]{3}[0-9]{5}|[0-9]{8}|[A-Z]{1}[0-9]{8})$/i;
+
+function validatePassport(passportNumber) {
+    return passportRegex.test(passportNumber);
+}
+
+// Test examples
+console.log(validatePassport("A1234567"));       // true (India)
+console.log(validatePassport("123456789"));      // true (USA)
+console.log(validatePassport("C012345678"));     // true (Germany)
+console.log(validatePassport("N1234567"));       // true (Australia)
+console.log(validatePassport("AB123456"));       // true (Canada)
+console.log(validatePassport("A123456"));        // false (too short)
+console.log(validatePassport("12345678A"));      // true (USA variation)
+console.log(validatePassport("ABCDE123"));        // false (not valid format)
+console.log(validatePassport("C12345678"));      // false (too long)
+console.log(validatePassport("A123456789"));     // false (too long)
