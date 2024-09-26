@@ -1,4 +1,4 @@
-function isValidPassport(passportNumber, country) {
+function validatePassport(passportNumber) {
     // Define regex patterns for different countries
     const patterns = {
         "US": /^(?!^0+$)[0-9]{9}$/,                          // 9 digits, cannot be all zeros
@@ -26,42 +26,33 @@ function isValidPassport(passportNumber, country) {
         // Add more countries and patterns as needed
     };
 
-    // Check if the country is supported
-    if (!patterns[country]) {
-        throw new Error(`Country ${country} not supported.`);
+    // Check if the passport number matches any country's pattern
+    for (const [country, pattern] of Object.entries(patterns)) {
+        if (pattern.test(passportNumber)) {
+            throw new Error(`Error: The passport number '${passportNumber}' matches the format of country: ${country}.`);
+        }
     }
 
-    // Validate the passport number against the selected country's pattern
-    return patterns[country].test(passportNumber);
+    // If no matches were found, the passport number is considered valid (or non-conflicting)
+    return true;
 }
 
 // Example usage
-const passportNumbers = {
-    "US": "123456789",   // valid
-    "UK": "A1234567B",   // valid
-    "DE": "C01A23456",   // valid
-    "IN": "A1234567",    // valid
-    "CA": "AB123456",    // valid
-    "AU": "A1234567",    // valid
-    "FR": "12AB34567",    // valid
-    "IT": "M12345678",    // valid
-    "JP": "A12345678",    // valid
-    "BR": "12345678",     // valid
-    "MX": "A123456789",   // valid
-    "ZA": "A1234567",     // valid
-    "CN": "E12345678",    // valid
-    "RU": "123456789",     // valid
-    "ES": "A1234567B",     // valid
-    "TR": "A12345678",     // valid
-    "AR": "12345678",      // valid
-    "CO": "1234567890",    // valid
-    "PH": "A12345678",     // valid
-    "ID": "A1234567",      // valid
-    "MY": "A12345678",     // valid
-    "SG": "A1234567",      // valid
-    // Add more countries and passport numbers for testing
-};
+const passportNumbers = [
+    "123456789",   // US valid (should throw an error)
+    "A1234567B",   // UK valid (should throw an error)
+    "C01A23456",   // DE valid (should throw an error)
+    "A1234567",    // IN valid (should throw an error)
+    "AB123456",    // CA valid (should throw an error)
+    "INVALID123",  // Invalid passport (should not throw an error)
+    "A12345678",   // AU valid (should throw an error)
+];
 
-for (const [country, passportNumber] of Object.entries(passportNumbers)) {
-    console.log(`${passportNumber} (${country}): ${isValidPassport(passportNumber, country)}`);
-}
+passportNumbers.forEach(passportNumber => {
+    try {
+        validatePassport(passportNumber);
+        console.log(`The passport number '${passportNumber}' is valid (not matching any country).`);
+    } catch (error) {
+        console.error(error.message);
+    }
+});
