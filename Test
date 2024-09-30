@@ -1,219 +1,36 @@
-// Generic matcher function
-function createMatcher(patterns) {
-    return {
-        matches: function(input) {
-            // Trim input to remove leading and trailing spaces
-            input = input.trim();
-            return patterns.some(({ regex, keywords }) => {
-                // Check if the input matches the regex pattern
-                const regexMatched = regex.test(input);
-                
-                const keywordRegex = new RegExp(`(${keywords.join('|')})`, 'i');
-                const keywordMatched = keywordRegex.test(input);
-                
-                return regexMatched && keywordMatched;
-            });
-        }
-    };
+// Passport Validation Regex for 15 countries
+const passportRegex = {
+  USA: /^[0-9]{9}$/,                   // USA - 9 digits
+  UK: /^\d{9}$/,                       // UK - 9 digits
+  Canada: /^[A-Z]{2}\d{6}$/,            // Canada - 2 letters followed by 6 digits
+  Germany: /^[CFGHJKLMNPRTVWXYZ0-9]{9}$/, // Germany - 9 alphanumeric characters
+  India: /^[A-Z]{1}-?\d{7}$/,           // India - 1 letter followed by 7 digits
+  Australia: /^[A-Z]\d{7}$/,            // Australia - 1 letter followed by 7 digits
+  France: /^\d{2}[A-Z]{2}\d{5}$/,       // France - 2 digits, 2 letters, 5 digits
+  China: /^[G|E]\d{8}$/,                // China - 'G' or 'E' followed by 8 digits
+  Brazil: /^[A-Z]{2}\d{6}$/,            // Brazil - 2 letters followed by 6 digits
+  Russia: /^\d{9}$/,                   // Russia - 9 digits
+  Japan: /^[A-Z]{2}\d{7}$/,             // Japan - 2 letters followed by 7 digits
+  SouthKorea: /^[M|S]\d{8}$/,           // South Korea - 'M' or 'S' followed by 8 digits
+  Italy: /^[A-Z0-9]{9}$/,               // Italy - 9 alphanumeric characters
+  Mexico: /^[A-Z]\d{8}$/,               // Mexico - 1 letter followed by 8 digits
+  Spain: /^[A-Z]{3}\d{6}$/,             // Spain - 3 letters followed by 6 digits
+};
+
+// Function to validate passport based on country
+function validatePassport(country, passportNumber) {
+  const regex = passportRegex[country];
+  if (regex) {
+    return regex.test(passportNumber);
+  } else {
+    console.error("Country not supported for passport validation");
+    return false;
+  }
 }
 
-// Define patterns for various types with regex and keywords separated
-const patterns = [
-    {
-        // CVV pattern
-        regex: /\b\d{3,4}\b/, // Regex matches 3 or 4 digits
-        keywords: ["cvv"] // Keyword to match
-    },
-    {
-        // Credit Card pattern
-        regex: /(?:\d[\s-]?){16}\b/, // Regex to match credit card formats (16 digits, spaces, or dashes)
-        keywords: ["credit card number", "cc number", "credit card #", "card #", "card number", "credit card", "card #"] // Keywords to match
-    },
-    {
-        // SSO pattern
-        regex: /\b\d{9}\b|\b\d{3}-\d{2}-\d{4}\b/, // Regex matches SSO formats
-        keywords: ["Single Sign-On", "SSO"] // Keywords to match
-    },
-    {
-        // Passport Number pattern
-        regex: /\b[A-Za-z0-9]{6,9}\b/, // Regex matches passport number format
-        keywords: ["passport number", "passport"] // Keywords to match
-    },
-    {
-        // Patient ID pattern
-        regex: /\b[A-Z]{2}\d{3}\/\d{3}\.\d{2}\b/, // Regex matches Patient ID format
-        keywords: ["patient id", "patientId"] // Keywords to match
-    },
-    {
-        // DOB pattern
-        regex: /\b\d{4}[-\/]\d{1,2}[-\/]\d{1,2}\b/, // Regex matches date of birth format
-        keywords: ["dob", "birth date", "date of birth"] // Keywords to match
-    },
-    {
-        // Address pattern
-        regex: /\b\d{5}(-\d{4})?\b/, // Regex matches zip code format
-        keywords: ["address", "zip code"] // Keywords to match
-    },
-    {
-        // SSN pattern (Social Security Number)
-        regex: /\b\d{3}-\d{2}-\d{4}\b|\b\d{9}\b/, // Regex matches SSN formats: "123-45-6789" or "123456789"
-        keywords: ["ssn", "social security number"] // Keywords to match
-    },
-    {
-        // 19-digit Account Number pattern
-        regex: /(?:\d[\s-]?){19}\b/, // Regex allows optional spaces or dashes between digits
-        keywords: ["account number", "bank account", "19 digit account"] // Keywords to match
-    }
-];
+// Example Usage:
+const country = "USA";
+const passportNumber = "123456789";
+const isValid = validatePassport(country, passportNumber);
 
-// Create the matcher using the defined patterns
-const genericMatcher = createMatcher(patterns);
-
-
-// Test examples for each pattern
-const testInputs = [
-    // CVV Tests
-    "123 is my cvv", 
-    "This is my cvv: 456", 
-    "My CVV number is 789", 
-    "CVV 321 is valid", 
-    "What is your CVV? 654", 
-    "cvv: 987",
-    "Remember my cvv: 135",
-    "Please enter the cvv 246",
-    "The cvv is 369",
-    "I lost my CVV number: 852",
-    "Your CVV is 159",
-    "cvv 753 is important",
-    "My credit card has CVV 951",
-    "Your cvv code is 357",
-    "Provide your cvv: 852",
-    "CVV is: 147",
-    "My cvv number: 258",
-    "Please tell me your CVV: 963",
-    "The cvv I have is 864",
-    "My CVV is always 741",
-    "456 CVV is valid",
-    "The CVV is 4723",
-    "Here is my CVV: 8365",
-    "Please use CVV 1248",
-    "My CVV code is 5901",
-    "Remember, my CVV is 3784",
-    "In order to complete this transaction, my CVV is 123",
-    "For verification, my cvv is 456",
-    "To finalize your order, please enter your CVV: 789",
-    "I confirmed the payment with CVV 321",
-    "The last three digits are my cvv: 654",
-    "When shopping online, always check your CVV: 987",
-    "The cvv I use often is 135",
-    "My preferred cvv for this account is 246",
-    "Just enter the CVV, which is 369, to proceed",
-    "To access my account, I need to provide my CVV: 852",
-    "Ensure your CVV is entered correctly, mine is 159",
-    "For security, my cvv 753 is never shared",
-    "The CVV on my card is 951",
-    "I need to input the cvv code: 357",
-    "To confirm the purchase, please enter cvv: 852",
-    "The correct CVV is: 147",
-    "The cvv number I remember is: 258",
-    "Please note my CVV is: 963",
-    "For this transaction, my CVV is 864",
-    "Every time I shop, I provide my CVV: 741",
-    "When confirming the order, use the CVV: 456",
-    "It's important to keep your cvv secure: 159",
-    "In case of a refund, my cvv is: 852",
-    "For assistance, my CVV number is 753",
-
-    // Credit Card Tests
-    "Is 1234567891234567 my credi card number?", 
-    "Please provide the credit card number 1234 5678 9012 3456.", 
-    "Your card # 9876 5432 1234 5678 is active.", 
-    "Use my credit card # 4444 3333 2222 1111 for payment.", 
-    "I need my credit card number: 1234 5678 9012 3456.", 
-    "My card # 1234567891234567 was just processed.", 
-    "The cc number: 4567 8910 1112 1314 is pending.", 
-    "This credit card number 1234-4321-8765-5678 is not valid.", 
-    "I lost my card # 6789 0123 4567 8901!", 
-    "Credit card # 7890-1234-5678-9012 is my backup.", 
-    "Please provide the cc number 2222-3333-4444-5555.", 
-    "The number 1111222233334444 is a credit card number.", 
-    "Check my credit card # 3333 4444 5555 6666, please.", 
-    "I have a cc number 4567-8901-2345-6789 as well.", 
-    "Is it true that 1234567812345678 is my credit card number?", 
-    "My credit card number is 1234-5678-1234-5678.", 
-    "The credit card number is 2345 6789 0123 4567.", 
-    "My card number is 4567 8901 2345 6789.", 
-    "1234-5678-1234-5678 is my credit card number.", 
-    "The cc number is 3456 7890 1234 5678.", 
-    "My cc number is: 1111-2222-3333-4444!", 
-    "The number 5678-1234-4321-8765 is my card #.", 
-    "1234-5678-1234-5678 is valid credit card #.", 
-    "Your cc number is 8888-9999-0000-1111.", 
-    "My card number: 2345-6789-0123-4567 expired.", 
-
-    // SSO Tests
-    "123456789 is my SSO.", 
-    "My Single Sign-On (SSO) number is 987654321.", 
-    "SSO: 111223333 is required for processing.", 
-    "The number 555667788 is my Single Sign-On.", 
-    "Can I have your SSO? It's 444556666.", 
-    "I need to verify the Single Sign-On sso 222334455.", 
-    "Your SSO number is 333445666.", 
-    "Please provide your Single Sign-On: 777889900 for verification.", 
-    "Is 999001234 my SSO number?", 
-    "My Single Sign-On number is 123-45-6789.", 
-    "For security, enter your sso 123456789.", 
-    "Your Single Sign-On code is 246-80-3579.", 
-    "I have my SSO number, which is 123456789.", 
-    "The required Single Sign-On is: 987-65-4321.", 
-    "The SSO for John Doe is 321654987.", 
-    "To complete registration, please enter your SSO: 135792468.", 
-    "Don't forget your Single Sign-On: 654321987 for access.", 
-    "Your sso code is: 147258369.", 
-    "The current SSO is 456789012.", 
-    "Use this SSO 789456123 for login.", 
-    "The SSO code is 258369147.", 
-    "To verify, enter your SSO: 369258147.", 
-    "Please enter your SSO number: 852741963.", 
-    "Can you confirm your SSO 963852741?", 
-    "What is your SSO: 147258369?", 
-    "Your SSO should be 258159753.", 
-    "For access, my SSO is: 789654123.", 
-    "Your Single Sign-On (SSO) is: 852456963.", 
-    "The SSO you provided is: 951753852.", 
-    "Can you confirm my SSO is 321987654?", 
-    "Please verify your SSO: 456123789.", 
-    "To access your account, enter SSO: 789321654.", 
-    "For help, your SSO code is 987123456.", 
-    "My SSO number is: 456987321.", 
- 
-
-    // Patient ID Tests
-    "My patient ID is AB123/456.78.", 
-    "The patient ID you need is CD456/789.12.", 
-    "My patient ID is EF789/012.34.", 
-    "Is my patient ID GH123/456.78 valid?", 
-    "The required patient ID is IJ456/789.12.", 
-    "My patient ID is KL789/012.34.", 
-    "The patient ID you asked for is MN123/456.78.", 
-    "Please check my patient ID OP456/789.12.", 
-    "Is patient ID QR789/012.34 valid?", 
-    "The ID for patient id is ST123/456.78.", 
-    "My patient ID is UV456/789.12.", 
-    "Your patient ID is WX789/012.34.", 
-    "For verification, my patient ID is YZ123/456.78.",
-];
-
-
-// Function to test inputs
-function testMatcher(inputs) {
-    inputs.forEach(input => {
-        const result = genericMatcher.matches(input);
-        if (!result) {
-            console.log(`Input: "${input}" - Match: ${result}`);
-        } 
-    });
-}
-
-// Run the tests
-testMatcher(testInputs);
+console.log(`Passport ${passportNumber} for ${country} is valid: ${isValid}`);
