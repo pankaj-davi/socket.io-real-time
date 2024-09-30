@@ -1,72 +1,9 @@
-// Passport Validation Regex for 15 countries
-const passportRegex = {
-  USA: /^[0-9]{9}$/,                   // USA - 9 digits
-  UK: /^\d{9}$/,                       // UK - 9 digits
-  Canada: /^[A-Z]{2}\d{6}$/,            // Canada - 2 letters followed by 6 digits
-  Germany: /^[CFGHJKLMNPRTVWXYZ0-9]{9}$/, // Germany - 9 alphanumeric characters
-  India: /^[A-Z]{1}-?\d{7}$/,           // India - 1 letter followed by 7 digits
-  Australia: /^[A-Z]\d{7}$/,            // Australia - 1 letter followed by 7 digits
-  France: /^\d{2}[A-Z]{2}\d{5}$/,       // France - 2 digits, 2 letters, 5 digits
-  China: /^[G|E]\d{8}$/,                // China - 'G' or 'E' followed by 8 digits
-  Brazil: /^[A-Z]{2}\d{6}$/,            // Brazil - 2 letters followed by 6 digits
-  Russia: /^\d{9}$/,                   // Russia - 9 digits
-  Japan: /^[A-Z]{2}\d{7}$/,             // Japan - 2 letters followed by 7 digits
-  SouthKorea: /^[M|S]\d{8}$/,           // South Korea - 'M' or 'S' followed by 8 digits
-  Italy: /^[A-Z0-9]{9}$/,               // Italy - 9 alphanumeric characters
-  Mexico: /^[A-Z]\d{8}$/,               // Mexico - 1 letter followed by 8 digits
-  Spain: /^[A-Z]{3}\d{6}$/,             // Spain - 3 letters followed by 6 digits
-};
+USA /^[A-Za-z]\d{8}$/
 
-// Function to validate passport based on country
-function validatePassport(country, passportNumber) {
-  const regex = passportRegex[country];
-  if (regex) {
-    return regex.test(passportNumber);
-  } else {
-    console.error("Country not supported for passport validation");
-    return false;
-  }
-}
-
-// Example Usage:
-const country = "USA";
-const passportNumber = "123456789";
-const isValid = validatePassport(country, passportNumber);
-
-console.log(`Passport ${passportNumber} for ${country} is valid: ${isValid}`);
+IN /^[A-Za-z][0-9A-Za-z]{7}$/   //Canada
+china  /^[A-Z]\d{8}$/	
+Germany	/^[CFGJKLNPRTVWXYZ][0-9CFGJKLNPRTVWXYZ]{8}$/
 
 
 
-const patterns = [
-    {
-        // Credit Card pattern
-        regex: /(?i)(?:credit card number.*?(?:\d[\s-]?){16}|(?:\d[\s-]?){16}.*?credit card number|cc number.*?(?:\d[\s-]?){16}|(?:\d[\s-]?){16}.*?cc number|card #.*?(?:\d[\s-]?){16}|(?:\d[\s-]?){16}.*?card #)/,
-        keywords: ["credit card number", "cc number", "credit card #", "card #", "card number", "credit card"]
-    },
-    {
-        // SSO pattern
-        regex: /(?i)(?:sso.*?\b\d{9}\b|\b\d{9}\b.*?sso|Single Sign-On.*?\b\d{9}\b|\b\d{9}\b.*?Single Sign-On|\d{3}-\d{2}-\d{4}.*?sso|sso.*?\d{3}-\d{2}-\d{4})/,
-        keywords: ["Single Sign-On", "SSO"]
-    },
-    {
-        // Passport Number pattern
-        regex: /(?i)(?:passport number.*?\b[A-Za-z0-9]{8,9}\b|\b[A-Za-z0-9]{8,9}\b.*?passport number|passport.*?\b[A-Za-z0-9]{8,9}\b|\b[A-Za-z0-9]{8,9}\b.*?passport)/,
-        keywords: ["passport number", "passport"]
-    },
-    {
-        // Patient ID pattern
-        regex: /(?i)(?:patient id.*?\b[A-Z]{2}\d{3}\/\d{3}\.\d{2}\b|\b[A-Z]{2}\d{3}\/\d{3}\.\d{2}\b.*?patient id|patientId.*?\b[A-Z]{2}\d{3}\/\d{3}\.\d{2}\b|\b[A-Z]{2}\d{3}\/\d{3}\.\d{2}\b.*?patientId)/,
-        keywords: ["patient id", "patientId"]
-    },
-    {
-        // DOB pattern
-        regex: /(?i)(?:dob.*?\b\d{4}[-\/]\d{1,2}[-\/]\d{1,2}\b|\b\d{4}[-\/]\d{1,2}[-\/]\d{1,2}\b.*?dob|birth date.*?\b\d{4}[-\/]\d{1,2}[-\/]\d{1,2}\b|\b\d{4}[-\/]\d{1,2}[-\/]\d{1,2}\b.*?birth date|date of birth.*?\b\d{4}[-\/]\d{1,2}[-\/]\d{1,2}\b|\b\d{4}[-\/]\d{1,2}[-\/]\d{1,2}\b.*?date of birth)/,
-        keywords: ["dob", "birth date", "date of birth"]
-    },
-    {
-        // Address pattern
-        regex: /(?i)(?:address.*?\b\d{5}(-\d{4})?\b|\b\d{5}(-\d{4})?\b.*?address|zip code.*?\b\d{5}(-\d{4})?\b|\b\d{5}(-\d{4})?\b.*?zip code)/,
-        keywords: ["address", "zip code"]
-    }
-];
 
