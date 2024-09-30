@@ -34,3 +34,39 @@ const passportNumber = "123456789";
 const isValid = validatePassport(country, passportNumber);
 
 console.log(`Passport ${passportNumber} for ${country} is valid: ${isValid}`);
+
+
+
+const patterns = [
+    {
+        // Credit Card pattern
+        regex: /(?i)(?:credit card number.*?(?:\d[\s-]?){16}|(?:\d[\s-]?){16}.*?credit card number|cc number.*?(?:\d[\s-]?){16}|(?:\d[\s-]?){16}.*?cc number|card #.*?(?:\d[\s-]?){16}|(?:\d[\s-]?){16}.*?card #)/,
+        keywords: ["credit card number", "cc number", "credit card #", "card #", "card number", "credit card"]
+    },
+    {
+        // SSO pattern
+        regex: /(?i)(?:sso.*?\b\d{9}\b|\b\d{9}\b.*?sso|Single Sign-On.*?\b\d{9}\b|\b\d{9}\b.*?Single Sign-On|\d{3}-\d{2}-\d{4}.*?sso|sso.*?\d{3}-\d{2}-\d{4})/,
+        keywords: ["Single Sign-On", "SSO"]
+    },
+    {
+        // Passport Number pattern
+        regex: /(?i)(?:passport number.*?\b[A-Za-z0-9]{8,9}\b|\b[A-Za-z0-9]{8,9}\b.*?passport number|passport.*?\b[A-Za-z0-9]{8,9}\b|\b[A-Za-z0-9]{8,9}\b.*?passport)/,
+        keywords: ["passport number", "passport"]
+    },
+    {
+        // Patient ID pattern
+        regex: /(?i)(?:patient id.*?\b[A-Z]{2}\d{3}\/\d{3}\.\d{2}\b|\b[A-Z]{2}\d{3}\/\d{3}\.\d{2}\b.*?patient id|patientId.*?\b[A-Z]{2}\d{3}\/\d{3}\.\d{2}\b|\b[A-Z]{2}\d{3}\/\d{3}\.\d{2}\b.*?patientId)/,
+        keywords: ["patient id", "patientId"]
+    },
+    {
+        // DOB pattern
+        regex: /(?i)(?:dob.*?\b\d{4}[-\/]\d{1,2}[-\/]\d{1,2}\b|\b\d{4}[-\/]\d{1,2}[-\/]\d{1,2}\b.*?dob|birth date.*?\b\d{4}[-\/]\d{1,2}[-\/]\d{1,2}\b|\b\d{4}[-\/]\d{1,2}[-\/]\d{1,2}\b.*?birth date|date of birth.*?\b\d{4}[-\/]\d{1,2}[-\/]\d{1,2}\b|\b\d{4}[-\/]\d{1,2}[-\/]\d{1,2}\b.*?date of birth)/,
+        keywords: ["dob", "birth date", "date of birth"]
+    },
+    {
+        // Address pattern
+        regex: /(?i)(?:address.*?\b\d{5}(-\d{4})?\b|\b\d{5}(-\d{4})?\b.*?address|zip code.*?\b\d{5}(-\d{4})?\b|\b\d{5}(-\d{4})?\b.*?zip code)/,
+        keywords: ["address", "zip code"]
+    }
+];
+
