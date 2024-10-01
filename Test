@@ -1,11 +1,12 @@
-const pattern = /(?:\b(?:sso|Single Sign-On)\b.*?\b\d{9}\b|\b\d{9}\b.*?\b(?:sso|Single Sign-On)\b|\d{3}-\d{2}-\d{4}.*?\b(?:sso|Single Sign-On)\b|\b(?:sso|Single Sign-On)\b.*?\d{3}-\d{2}-\d{4})/gi;
+const pattern = /(?:\b(?:\w*SSO|\w*Single Sign-On)\b.*?\b\d{9}\b|\b\d{9}\b.*?\b(?:\w*SSO|\w*Single Sign-On)\b|\d{3}-\d{2}-\d{4}.*?\b(?:\w*SSO|\w*Single Sign-On)\b|\b(?:\w*SSO|\w*Single Sign-On)\b.*?\d{3}-\d{2}-\d{4})/gi;
+
 
 // Example array
 const example = [
     "123456789 is my.", 
-    "My Single Sign-On (SSO) number is 987654321.", 
+    "My mSingle Sign-On  number is 987654321.", 
     ": 111223333 is required for processing. sso", 
-    "The number 555667788 is my Single Sign-On.", 
+    "The number 555-66-7788 is my Single Sign-On.", 
     "Can I have your SSO? It's 444556666.", 
     "I need to verify the single sign-On sso 222334455.", 
     "Your SSO number is 333445666.", 
@@ -30,12 +31,12 @@ const example = [
     "Your SSO should be 258159753.", 
     "For access, my SSO is: 789654123.", 
     "Your Single Sign-On (SSO) is: 852456963.", 
-    "The SSO you provided is: 951753852.", 
+    "The SSO you provided is: 951-75-3852.", 
     "Can you confirm my SSO is 321987654?", 
     "Please verify your SSO: 456123789.", 
     "To access your account, enter SSO: 789321654.", 
-    "For help, your SSO code is 987123456.", 
-    " is: 456987321. My SSO number"
+    "For help, your mySSO code is 987-12-3456.", 
+    " is: 456-98-7321. My SSO number"
 ];
 
 example.forEach((item) => {
@@ -44,4 +45,3 @@ example.forEach((item) => {
         console.log(`${item}`);
     } 
 });
- 
