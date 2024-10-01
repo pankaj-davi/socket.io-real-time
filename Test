@@ -1,5 +1,5 @@
 const pattern = /(?:\b(?:\w*SSO|\w*Single Sign-On)\b.*?\b\d{9}\b|\b\d{9}\b.*?\b(?:\w*SSO|\w*Single Sign-On)\b|\d{3}-\d{2}-\d{4}.*?\b(?:\w*SSO|\w*Single Sign-On)\b|\b(?:\w*SSO|\w*Single Sign-On)\b.*?\d{3}-\d{2}-\d{4})/gi;
-
+const pattern = /(?:\b(?:credit card|cc|card #)\b.*?(?:\d{4}[-\s]?){3}\d{4}|\b(?:\d{4}[-\s]?){3}\d{4}\b.*?(?:credit card|cc|card #)\b|\b(?:credit card|cc|card #)\b.*?(?:\d{4}[-\s]?){3}\d{4})/gi;
 
 // Example array
 const example = [
@@ -36,7 +36,22 @@ const example = [
     "Please verify your SSO: 456123789.", 
     "To access your account, enter SSO: 789321654.", 
     "For help, your mySSO code is 987-12-3456.", 
-    " is: 456-98-7321. My SSO number"
+    " is: 456-98-7321. My SSO number",
+    "Is 1234567891234567 my credit card number?", // Valid
+    "Please provide the credit card number 1234 5678 9012 3456.", // Valid
+    "Your card # 9876 5432 1234 5678 is active1.", // Valid
+    "Use my credit card # 4444 3333 2222 1111 for payment.", // Valid
+    "credit card number I need my : 1234-5678-9012-3456.", // Valid
+    "My card # 1234567891234567 was just processed.", // Valid
+    "The cc number: 4567 8910 1112 1314 is pending.", // Valid
+    "This credit card number 1234-4321-8765-5678 is not valid.", // Valid
+    "I lost my card # 6789 0123 4567 8901!", // Valid
+    "Credit card # 7890-1234-5678-9012 is my backup.", // Valid
+    "Please provide the cc number 2222-3333-4444-5555.", // Valid
+    "The number 1111222233334444 is a credit card number.", // Valid
+    "Check my credit card # 3333 4444 5555 6666, please.", // Valid
+    "I have a cc number 4567-8901-2345-6789 as well.", // Valid
+    "Is it true that 1234567812345678 is my credit card number?", // Valid
 ];
 
 example.forEach((item) => {
