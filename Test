@@ -60,3 +60,54 @@ example.forEach((item) => {
         console.log(`${item}`);
     } 
 });
+
+function checkKeywordsWithinWindow(text, keywordsAndPatterns, windowLength) {
+    // Convert the window length to the number of characters on each side (half the window)
+    let halfWindow = Math.floor(windowLength / 2);
+
+    // Loop through each keyword and pattern object
+    for (let { keywords, pattern } of keywordsAndPatterns) {
+        // Loop through each keyword
+        for (let keyword of keywords) {
+            // Regular expression to find the keyword
+            let regexKeyword = new RegExp(`.{0,${halfWindow}}(${keyword}).{0,${halfWindow}}`, 'gi');
+
+            // Find all occurrences of the keyword
+            let match;
+            while ((match = regexKeyword.exec(text)) !== null) {
+                let start = Math.max(0, match.index - halfWindow);
+                let end = Math.min(text.length, match.index + keyword.length + halfWindow);
+                
+                let windowText = text.substring(start, end);
+
+                // Check if the corresponding pattern appears in the same window as the keyword
+                if (pattern.test(windowText)) {
+                    console.error(`Error: Both "${keyword}" and a 3- or 4-digit number found within ${windowLength} characters.`);
+                    return true;  // Error found
+                }
+            }
+        }
+    }
+
+    console.error(`No Error found`);  // No error found
+    return false;  // No error found
+}
+
+// Example: Array containing multiple objects with keywords and regex patterns
+let keywordsAndPatterns = [
+    {
+        keywords: ["test", "test code", "credit", "card #"], 
+        pattern: /\b\d{3,4}\b/ // Match 3 or 4 digit numbers
+    },
+    {
+        keywords: ["ccv", "cvv code", "card"], 
+        pattern: /\b\d{3,4}\b/ // Match 3 or 4 digit numbers
+    }
+];
+
+// Input text
+let inputText = "Lorem Ipsum is simply dummy text of the printing and typesetting industry.321 Lorem Ipsum ccv has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum 357.";
+
+// Call the function to check for multiple keywords and patterns within 100 characters
+checkKeywordsWithinWindow(inputText, keywordsAndPatterns, 100);
+
